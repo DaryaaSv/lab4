@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles1.css">
+  <title>Hospital Database</title>
+</head>
+<body>
+<div id="app">
+  <div class="container">
+    <div class="table-selection">
+      <label for="tableSelect">Select Table:</label>
+      <select id="tableSelect" onchange="onTableSelectChange()">
+        <option value="doctors">Doctors</option>
+        <option value="doctor_schedule">Doctor Schedule</option>
+        <option value="patients">Patients</option>
+        <option value="appointments">Appointments</option>
+      </select>
+      <br><br>
+      <button id="sqlExecutorButton">Open SQL Executor</button>
+    </div>
+    <div id="content"></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
