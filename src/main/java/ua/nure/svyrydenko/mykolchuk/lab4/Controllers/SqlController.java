@@ -4,8 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.Date;
 
@@ -13,13 +12,20 @@ import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 
 import java.sql.Types;
+import java.util.List;
 import java.util.Map;
 
 @Controller
 public class SqlController {
+    private String result = "";
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @GetMapping("/executeFunction")
+    public String Main(Model model) {
+        model.addAttribute("result", result);
+        return "sql-executor";
+    }
 
     @PostMapping("/executeFunction")
     public String executeFunction(@RequestParam String executionType,
@@ -28,40 +34,43 @@ public class SqlController {
                                   @RequestParam(required = false) String phoneNumber,
                                   @RequestParam(required = false) String appointmentType,
                                   @RequestParam(required = false) Date appointmentDate,
-                                  @RequestParam(required = false) long doctorId,
-                                  @RequestParam(required = false) long patientId,
+                                  @RequestParam(required = false) Long doctorId,
+                                  @RequestParam(required = false) Long patientId,
                                   @RequestParam(required = false) String dayOfWeek,
-                                  @RequestParam(required = false) long doctorIdForSchedule,
+                                  @RequestParam(required = false) Long doctorIdForSchedule,
                                   @RequestParam(required = false) java.sql.Time startTime,
                                   @RequestParam(required = false) java.sql.Time endTime,
                                   Model model) throws Exception {
-        String result = null;
 
-        if ("function".equals(executionType)) {
-            switch (sqlOption) {
-                case "FindMostExpensiveDoctor":
-                    result = executeFindMostExpensiveDoctor(dateParam);
-                    break;
-                case "GetSpentByPatient":
-                    result = executeGetSpentByPatient(phoneNumber);
-                    break;
-            }
+        try {
+            if ("function".equals(executionType)) {
+                switch (sqlOption) {
+                    case "FindMostExpensiveDoctor":
+                        result = executeFindMostExpensiveDoctor(dateParam);
+                        break;
+                    case "GetSpentByPatient":
+                        result = executeGetSpentByPatient(phoneNumber);
+                        break;
+                }
 
-        } else if ("procedure".equals(executionType)) {
-            switch (sqlOption) {
-                case "AddAppointment":
-                    executeAddAppointment(appointmentType, appointmentDate, doctorId, patientId);
-                    result = "AddAppointment executed successfully";
-                    break;
-                case "UpdateDoctorSchedule":
-                    executeUpdateDoctorSchedule(doctorId, dayOfWeek, startTime, endTime);
-                    result = "UpdateDoctorSchedule executed successfully";
-                    break;
+            } else if ("procedure".equals(executionType)) {
+                switch (sqlOption) {
+                    case "AddAppointment":
+                        executeAddAppointment(appointmentType, appointmentDate, doctorId, patientId);
+                        result = "AddAppointment executed successfully";
+                        break;
+                    case "UpdateDoctorSchedule":
+                        executeUpdateDoctorSchedule(doctorId, dayOfWeek, startTime, endTime);
+                        result = "UpdateDoctorSchedule executed successfully";
+                        break;
+                }
             }
+            model.addAttribute("result", result);
+            return "sql-executor";
+        } catch (Exception e) {
+            model.addAttribute("error", "An error occurred: " + e.getMessage());
+            return "error-page"; // Create an "error-page.html" to display error messages
         }
-
-        model.addAttribute("result", result);
-        return "result";
     }
 
     private String executeFindMostExpensiveDoctor(Date dateParam) {
@@ -69,9 +78,23 @@ public class SqlController {
         return jdbcTemplate.queryForObject(sql, String.class, dateParam);
     }
 
+    @PostMapping("/executeFunctionProcedure")
     private String executeGetSpentByPatient(String phoneNumber) {
         String sql = "SELECT * FROM dbo.GetSpentByPatient(?)";
-        return jdbcTemplate.queryForObject(sql, String.class, phoneNumber);
+
+        List<Map<String, Object>> resultList = jdbcTemplate.queryForList(sql, phoneNumber);
+
+        // Process the resultList to convert it into a string
+        StringBuilder resultStringBuilder = new StringBuilder();
+
+        for (Map<String, Object> row : resultList) {
+            for (Map.Entry<String, Object> entry : row.entrySet()) {
+                resultStringBuilder.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+            }
+            resultStringBuilder.append("\n");
+        }
+
+        return resultStringBuilder.toString();
     }
 
     private void executeAddAppointment(String appointmentType, Date appointmentDate, long doctorId, long patientId) {
