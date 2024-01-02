@@ -6,7 +6,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     showTable('doctors');
 
-    // Add an event listener for the button click
     document.getElementById('sqlExecutorButton').addEventListener('click', openSqlExecutor);
 });
 
@@ -51,8 +50,6 @@ function displayTable(data, tableName) {
     contentContainer.appendChild(table);
 }
 
-// Function to open the SQL executor page
 function openSqlExecutor() {
-    // You can replace 'sql-executor.html' with the actual path to your SQL executor page
-    window.location.href = 'sql-executor.html';
+    window.location.href = 'db.html';
 }

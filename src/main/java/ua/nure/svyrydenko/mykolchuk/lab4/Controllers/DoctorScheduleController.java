@@ -24,7 +24,7 @@ public class DoctorScheduleController {
     @Autowired
     private DoctorService doctorsService;
 
-    @GetMapping("/doctor_schedule")  // Specify the endpoint path
+    @GetMapping("/doctor_schedule")
     public List<DoctorScheduleDTO> getAllDoctorSchedules() {
         List<DoctorSchedule> doctorSchedules = doctorScheduleService.getAllDoctorSchedules();
         return convertToDto(doctorSchedules);
@@ -33,7 +33,7 @@ public class DoctorScheduleController {
     private List<DoctorScheduleDTO> convertToDto(List<DoctorSchedule> doctorSchedules) {
         return doctorSchedules.stream()
                 .map(doctorSchedule -> {
-                    Doctor doctor = doctorsService.getDoctorById(doctorSchedule.getDoctor().getDoctorId());  // Fix method name
+                    Doctor doctor = doctorsService.getDoctorById(doctorSchedule.getDoctor().getDoctorId());
                     return new DoctorScheduleDTO(
                             doctor.getDoctorId(),
                             doctor.getFirstName() + " " + doctor.getLastName(),
@@ -42,6 +42,6 @@ public class DoctorScheduleController {
                             doctorSchedule.getEndTime()
                     );
                 })
-                .collect(Collectors.toList());  // Use Collectors.toList() to collect the stream
+                .collect(Collectors.toList());
     }
 }

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Database Operations Interface</title>
+    <link rel="stylesheet" href="styles2.css">
+</head>
+<body>
+<h1>Database Operations Interface</h1>
+
+<label for="operationSelect">Select an Operation:</label>
+<select id="operationSelect" onchange="showParametersForm()">
+    <option value="">--Select Operation--</option>
+    <option value="GetSpentByPatient">GetSpentByPatient</option>
+    <option value="FindMostExpensiveDoctor">FindMostExpensiveDoctor</option>
+    <option value="AddAppointment">AddAppointment</option>
+    <option value="UpdateDoctorSchedule">UpdateDoctorSchedule</option>
+</select>
+
+<div id="parametersForm" style="margin-top: 20px;">
+</div>
+
+<button onclick="executeFunctionProcedure()" style="margin-top: 10px;">Execute</button>
+
+<div id="results" style="margin-top: 20px;"></div>
+
+<script>
+    function showParametersForm() {
+        const operation = document.getElementById('operationSelect').value;
+        const formContainer = document.getElementById('parametersForm');
+        formContainer.innerHTML = '';
+
+        if (operation === 'GetSpentByPatient') {
+            formContainer.innerHTML = '<label for="phoneNumber">Phone Number:</label><input type="text" id="phoneNumber" name="phoneNumber"><br>';
+        } else if (operation === 'FindMostExpensiveDoctor') {
+            formContainer.innerHTML = '<label for="dateParam">Date:</label><input type="date" id="dateParam" name="dateParam"><br>';
+        } else if (operation === 'AddAppointment') {
+            formContainer.innerHTML = '<label for="appointmentType">Appointment Type:</label><input type="text" id="appointmentType" name="appointmentType"><br>' +
+                '<label for="appointmentDate">Appointment Date:</label><input type="date" id="appointmentDate" name="appointmentDate"><br>' +
+                '<label for="doctorId">Doctor ID:</label><input type="number" id="doctorId" name="doctorId"><br>' +
+                '<label for="patientId">Patient ID:</label><input type="number" id="patientId" name="patientId"><br>';
+        } else if (operation === 'UpdateDoctorSchedule') {
+            formContainer.innerHTML = '<label for="doctorId">Doctor ID:</label><input type="number" id="doctorId" name="doctorId"><br>' +
+                '<label for="dayOfWeek">Day of Week:</label><input type="text" id="dayOfWeek" name="dayOfWeek"><br>' +
+                '<label for="startTime">Start Time:</label><input type="time" id="startTime" name="startTime"><br>' +
+                '<label for="endTime">End Time:</label><input type="time" id="endTime" name="endTime"><br>';
+        }
+    }
+
+    function executeFunctionProcedure() {
+        const operation = document.getElementById('operationSelect').value;
+        let parameters = {};
+        if (operation === 'GetSpentByPatient') {
+            parameters.phoneNumber = document.getElementById('phoneNumber').value;
+        } else if (operation === 'FindMostExpensiveDoctor') {
+            parameters.dateParam = document.getElementById('dateParam').value;
+        } else if (operation === 'AddAppointment') {
+            parameters.appointmentType = document.getElementById('appointmentType').value;
+            parameters.appointmentDate = document.getElementById('appointmentDate').value;
+            parameters.doctorId = document.getElementById('doctorId').value;
+            parameters.patientId = document.getElementById('patientId').value;
+        } else if (operation === 'UpdateDoctorSchedule') {
+            parameters.doctorId = document.getElementById('doctorId').value;
+            parameters.dayOfWeek = document.getElementById('dayOfWeek').value;
+            parameters.startTime = document.getElementById('startTime').value;
+            console.log(document.getElementById('startTime').value);
+            parameters.endTime = document.getElementById('endTime').value;
+        }
+
+        fetch('/execute', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({operation: operation, parameters: parameters})
+        })
+            .then(response => {
+                const contentType = response.headers.get("content-type");
+                if (
+                    contentType && contentType.includes("application/json")) {
+                    return response.json();
+                } else {
+                    return response.text();
+                }
+            })
+            .then(data => {
+                if (operation === 'GetSpentByPatient' || operation === 'FindMostExpensiveDoctor') {
+                    let tableString = convertJsonToTableString(data);
+                    document.getElementById('results').innerHTML = tableString;
+                } else {
+                    document.getElementById('results').innerText = data;
+                }
+            })
+            .catch(error => {
+                alert(error);
+                console.error('Error:', error);
+                document.getElementById('results').innerText = 'Error executing operation';
+            });
+    }
+
+        function convertJsonToTableString(jsonData) {
+        if (!jsonData.length) {
+            return 'No data to display';
+        }
+
+        let table = "<table border='1'>";
+        table += "<tr>";
+        for (let key in jsonData[0]) {
+            table += `<th>${key}</th>`;
+        }
+        table += "</tr>";
+
+        jsonData.forEach(obj => {
+            table += "<tr>";
+            for (let key in obj) {
+                table += `<td>${obj[key]}</td>`;
+            }
+            table += "</tr>";
+        });
+        table += "</table>";
+        return table;
+    }
+</script>
+</body>
+</html>
+

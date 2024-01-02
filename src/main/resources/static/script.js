@@ -13,13 +13,11 @@ function toggleForm() {
         functionForm.classList.add('active');
         sqlOption.innerHTML = getFunctionOptions();
         toggleOptionForm();
-        // Set the method attribute for the function form
         document.getElementById('functionForm').setAttribute('method', 'post');
     } else {
         procedureForm.classList.add('active');
         sqlOption.innerHTML = getProcedureOptions();
         toggleOptionForm();
-        // Set the method attribute for the procedure form
         document.getElementById('procedureForm').setAttribute('method', 'post');
     }
 }
