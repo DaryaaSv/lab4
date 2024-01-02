@@ -47,10 +47,19 @@
         }
     }
 
+    function isValidPhoneNumber(phoneNumber) {
+        return /^\+380 \d{2} \d{3} \d{4}$/.test(phoneNumber);
+    }
+
     function executeFunctionProcedure() {
         const operation = document.getElementById('operationSelect').value;
         let parameters = {};
         if (operation === 'GetSpentByPatient') {
+            var phoneNumber = document.getElementById('phoneNumber').value;
+            if (!isValidPhoneNumber(phoneNumber)) {
+                alert('Помилка: Неправильний формат номера телефону.');
+                return;
+            }
             parameters.phoneNumber = document.getElementById('phoneNumber').value;
         } else if (operation === 'FindMostExpensiveDoctor') {
             parameters.dateParam = document.getElementById('dateParam').value;
@@ -60,6 +69,11 @@
             parameters.doctorId = document.getElementById('doctorId').value;
             parameters.patientId = document.getElementById('patientId').value;
         } else if (operation === 'UpdateDoctorSchedule') {
+            var dayOfWeek = document.getElementById('dayOfWeek').value;
+            if (!['Понеділок', 'Вівторок', 'Середа', 'Четвер', 'П\'ятниця', 'Субота', 'Неділя'].includes(dayOfWeek)) {
+                alert('Помилка: Неправильний день тижня.');
+                return;
+            }
             parameters.doctorId = document.getElementById('doctorId').value;
             parameters.dayOfWeek = document.getElementById('dayOfWeek').value;
             parameters.startTime = document.getElementById('startTime').value;
@@ -100,6 +114,7 @@
         if (!jsonData.length) {
             return 'No data to display';
         }
+
 
         let table = "<table border='1'>";
         table += "<tr>";
